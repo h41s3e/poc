@@ -94,12 +94,13 @@
             transform: translateY(-1px);
         }
 
-        /* --- MAIN CORE CARD DESIGN --- */
+        /* --- MAIN CORE CARD DESIGN (HIGH CONTRAST PACK) --- */
         .bot-card, .config-panel {
-            background: var(--s1);
-            background-image: linear-gradient(145deg, rgba(139, 92, 246, 0.08) 0%, rgba(236, 72, 153, 0.03) 100%);
+            /* CHANGED: Set to deep base background and adjusted linear-gradient overlay for intense contrast */
+            background: var(--bg);
+            background-image: linear-gradient(145deg, rgba(139, 92, 246, 0.11) 0%, rgba(236, 72, 153, 0.04) 100%);
             
-            border: 2px solid rgba(139, 92, 246, .3);
+            border: 2px solid rgba(139, 92, 246, .35);
             border-radius: 20px;
             overflow: hidden;
             width: 100%;
@@ -231,7 +232,6 @@
             -webkit-text-fill-color: transparent;
         }
 
-        /* FIXED: Added a dynamic looping pulse glow to the Sale Badge */
         .sale-badge {
             background: var(--red);
             color: white;
@@ -288,7 +288,6 @@
             text-transform: uppercase;
             letter-spacing: 0.03em;
             box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
-            /* FIXED: Restored clean transition properties for hover actions */
             transition: background 0.25s ease, transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease;
         }
 
@@ -298,7 +297,6 @@
             fill: currentColor;
         }
 
-        /* FIXED: Restored lift response and intense glowing backdrop shadows */
         .bc-btn:hover {
             background: linear-gradient(135deg, #3b82f6, #2563eb);
             transform: translateY(-2px);
@@ -345,12 +343,39 @@
         }
 
         /* --- PANEL CONFIG CONTROLS --- */
+        .config-header-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px dashed rgba(6, 182, 212, 0.15);
+            padding-bottom: 12px;
+        }
+
+        .config-lock-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--cyan);
+            background: rgba(6, 182, 212, 0.1);
+            border: 1px solid rgba(6, 182, 212, 0.25);
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .layer-front .config-lock-icon {
+            background: rgba(6, 182, 212, 0.2);
+            border-color: rgba(6, 182, 212, 0.5);
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
+        }
+
         .config-title {
             font-family: var(--font-head);
             font-size: 13px;
             font-weight: 700;
             color: var(--cyan);
-            margin-bottom: 16px;
             text-transform: uppercase;
             letter-spacing: 0.08em;
         }
@@ -374,13 +399,75 @@
             border-radius: 8px;
             font-size: 13.5px;
             color: var(--text);
-            background-color: rgba(5, 8, 15, 0.6);
+            background-color: rgba(11, 16, 32, 0.7); /* Slightly lightened inner box for depth over dark body background */
             outline: none;
         }
 
         .input-group input:focus {
             border-color: var(--purple);
             box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+        }
+
+        /* --- UX AUTH WALL CONTROLS --- */
+        .panel-gate-screen {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 10px 0;
+        }
+
+        .gate-input-wrapper {
+            display: flex;
+            gap: 8px;
+        }
+
+        .gate-input-wrapper input {
+            flex: 1;
+            padding: 12px 14px;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            border-radius: 8px;
+            font-size: 14px;
+            color: #fff;
+            background: rgba(11, 16, 32, 0.8);
+            outline: none;
+            font-family: monospace;
+        }
+
+        .gate-input-wrapper input:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 8px rgba(6, 182, 212, 0.2);
+        }
+
+        .gate-verify-btn {
+            background: rgba(6, 182, 212, 0.15);
+            border: 1px solid var(--cyan);
+            color: var(--cyan);
+            padding: 0 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .gate-verify-btn:hover {
+            background: var(--cyan);
+            color: var(--bg);
+        }
+
+        .gate-status-hint {
+            font-size: 12px;
+            color: var(--t2);
+            line-height: 1.4;
+        }
+
+        .gate-status-hint span {
+            font-weight: 700;
+        }
+
+        .panel-protected-fields {
+            display: none;
         }
 
         /* --- GLOBAL KEYFRAMES ENGINE --- */
@@ -457,18 +544,40 @@
 
     <!-- CORE CARD 2: POC CONFIG PARAMETERS LAYER -->
     <div id="deck-card-config" class="config-panel layer-back">
-        <div class="config-title">⚙️ PoC Configuration Panel</div>
-        <div class="input-group">
-            <label>Name</label>
-            <input type="text" id="param-name" value="FouShee">
+        <div class="config-header-container">
+            <div class="config-lock-icon" id="panel-lock-frame">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+            </div>
+            <div class="config-title" id="panel-title-text">PoC Configuration Panel</div>
         </div>
-        <div class="input-group">
-            <label>Email</label>
-            <input type="email" id="param-email" value="jafar00008@gmail.com">
+
+        <!-- Terminal Password Prompt Gate Screen -->
+        <div class="panel-gate-screen" id="auth-gate-zone">
+            <div class="gate-status-hint" id="gate-msg">This console area is encrypted. Enter token authorization string to gain payload control mapping.</div>
+            <div class="gate-input-wrapper" id="gate-interactive-fields">
+                <input type="password" id="gate-token-pass" placeholder="Enter key...">
+                <button class="gate-verify-btn" onclick="evaluateGateToken()">Verify</button>
+            </div>
+            <div class="gate-status-hint" style="opacity: 0.6;">Attempts remaining: <span id="gate-retries-count" style="color:var(--orange)">3</span></div>
         </div>
-        <div class="input-group">
-            <label>Phone</label>
-            <input type="text" id="param-phone" value="test">
+
+        <!-- Protected Form Parameters -->
+        <div class="panel-protected-fields" id="protected-config-fields">
+            <div class="input-group">
+                <label>Name</label>
+                <input type="text" id="param-name" value="FouShee">
+            </div>
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" id="param-email" value="jafar00008@gmail.com">
+            </div>
+            <div class="input-group">
+                <label>Phone</label>
+                <input type="text" id="param-phone" value="test">
+            </div>
         </div>
     </div>
 
@@ -479,7 +588,50 @@
 </form>
 
 <script>
-    // Smooth depth swap engine with soft transitions
+    let securityAttempts = 3;
+
+    function evaluateGateToken() {
+        const passwordInput = document.getElementById('gate-token-pass');
+        const tokenVal = passwordInput.value;
+        const gateMsg = document.getElementById('gate-msg');
+        const countSpan = document.getElementById('gate-retries-count');
+        const interactiveRow = document.getElementById('gate-interactive-fields');
+        const lockFrame = document.getElementById('panel-lock-frame');
+
+        if (tokenVal === "0000Trival))") {
+            document.getElementById('auth-gate-zone').style.display = "none";
+            document.getElementById('protected-config-fields').style.display = "block";
+            
+            lockFrame.style.color = "var(--green)";
+            lockFrame.style.borderColor = "rgba(16, 185, 129, 0.4)";
+            lockFrame.style.background = "rgba(16, 185, 129, 0.1)";
+            lockFrame.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+                </svg>`;
+        } else {
+            securityAttempts--;
+            passwordInput.value = "";
+            
+            if (securityAttempts <= 0) {
+                interactiveRow.remove(); 
+                countSpan.parentElement.remove();
+                
+                gateMsg.innerText = "CRITICAL WARNING: Maximum validation attempts exceeded. Interface hardware locked out.";
+                gateMsg.style.color = "var(--red)";
+                
+                lockFrame.style.color = "var(--red)";
+                lockFrame.style.borderColor = "rgba(239, 68, 68, 0.5)";
+                lockFrame.style.background = "rgba(239, 68, 68, 0.15)";
+            } else {
+                gateMsg.innerText = "Invalid token credentials provided. Please re-verify target keys.";
+                gateMsg.style.color = "var(--orange)";
+                countSpan.innerText = securityAttempts;
+            }
+        }
+    }
+
     function swapStackFocus() {
         const botCard = document.getElementById('deck-card-bot');
         const configPanel = document.getElementById('deck-card-config');
